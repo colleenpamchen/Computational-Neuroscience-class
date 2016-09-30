@@ -43,6 +43,25 @@ legend('% coherence level','coherence level','FontSize',12,'FontWeight','bold')
 
 
 
+%% Psy 268A Homework 1
+
+s = -40:1:40;
+rmax= 52.14;
+smax= 0;
+sig= 14.73;
+
+y = rmax * exp( (-1/2)* (s - smax / sig).^2 );
+
+figure
+plot(s,y)
+title('Gaussian turning curve of avg. firing rate')
+xlabel('s: orientation angle in degrees') % x-axis label
+ylabel('f(Hz)') % y-axis label
+
+
+
+
+
 
 
 
