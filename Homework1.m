@@ -3,33 +3,47 @@
 
 ntrials = 100; 
 
-coherence = [0.8; 3.2; 12.8];
-lambda1 = 40; % for coherence 12.8%
+coherence = [0.8; 3.2; 12.8]; % coherence level of the stimuli presented in the 100 trials 
+lambda = [20; 20; 40]; % mean distribution of the firing rate responding to the UP preferred direction at each of the respective coherence level
 
-% stimuli = struct (coherence, round(rand(1,100)) );
-stimuli = round(rand(ntrials,1));  
+z = [1:100]'; % z threshold applied to discriminate the poissan firing rate distributions between UP and DOWN preferred directions   
+% i.e. If r >= z, report "UP" otherwise "DOWN" direction preference 
 
-r=poissrnd(lambda1,[ntrials,1]); 
+for (n=1:length(coherence))
+    
+stimuli = round(rand(ntrials,1)); % stimulus presented at each of the 100 trials 
+r = poissrnd(lambda(n),[ntrials,1]); % poissand firing rate distribution for preferred PLUS direction 
 
-z =25; 
+for (i=1:length(stimuli))
+predicted(i) = ( r(i) >= z(i) ); % Predicted behavioral response based on applying r, firing rate data, to a z threshold. 
+% UP direction is encoded 1; DOWN is 0 
+hit(i) = logical(predicted(i) == stimuli(i)); % hit 
+% fa = logical( find(stimuli == 0 & predicted ==1)); % false alarm
+fa(i) = logical( stimuli(i) == 0 & predicted ==1 );
 
-predicted = ( r >=z ); 
-hit = (predicted == stimuli); % hit 
-fa = logical( find(stimuli == 0 & predicted ==1)); % false alarm
-
-beta = sum(hit)/ntrials; 
-alpha = length(fa)/ntrials; 
+% end
 
 
-figure
-plot(alpha, beta,'x');
+beta(i) = sum(hit)/ntrials; 
+alpha(i) = sum(fa)/ntrials; 
 
+
+figure(n); 
 title('ROC Curve for z threshold at each motion coherence level','FontSize',12,'FontWeight','bold')
 axis([0,1,0,1])
 xlabel('\alpha (false alarm rate)','FontSize',12,'FontWeight','bold') % x-axis label
 ylabel('\beta (hit rate)','FontSize',12,'FontWeight','bold') % y-axis label
-legend('% coherence level','coherence level','FontSize',12,'FontWeight','bold')
- 
+legend('% coherence level')
+
+hold on ;
+plot(alpha(i), beta(i),'x');
+
+
+end
+
+
+
+end
 
 
 %% for each of the 100 stimuli, at each coherence level, apply the z threshold to the 
