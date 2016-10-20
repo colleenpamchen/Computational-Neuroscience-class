@@ -1,5 +1,10 @@
-%% HOMEWORK 2 
-%% Integrate and Fire Neuron 
+%% HOMEWORK 2 Colleen Chen ---> REVISION 
+% [ ] Ensure the entire script runs with appropriately labeled number of figures 
+% [ ] Check to makesure the spike trains are correct 
+%
+%
+%
+% Integrate and Fire Neuron 
 % V(t+1) = V(t) + (1/Tm)*(El - V(t) + Rm* Ie)
 
 clear all
@@ -51,9 +56,6 @@ ylabel('Frequency','FontSize',12,'FontWeight','bold')
 %% Izhikevich Neurons
 % Class 1 Excitable 
 
-clear all
-close all
-clc
 
 
 I =[ 1;20;30;60;100];    % I current injection
@@ -104,9 +106,7 @@ ylabel('Frequency','FontSize',12,'FontWeight','bold')
 
 
 %% Class 2 Excitable
-clear all
-close all
-clc
+
 % class 2 Excitable 
 a= 0.2;% a recovery time constasnt
 b= 0.26;% b<0 amplifying; b>0 resonating
@@ -154,9 +154,7 @@ xlabel('Current','FontSize',12,'FontWeight','bold')
 ylabel('Frequency','FontSize',12,'FontWeight','bold') 
 
 %% Regular spiking neuron 
-clear all
-close all
-clc
+
 
 a= 0.02;
 b= 0.2;
