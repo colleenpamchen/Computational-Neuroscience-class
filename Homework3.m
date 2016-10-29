@@ -60,12 +60,46 @@ plot(time,firing2(2:102),'r')
 hold off
 
 
+
+%%
+
+
 % keep track of E2 > E1 at 51st 
 % and 100th time step 
 % proportion of E2>E1 from the 100 runs 
-
-
 % "activity difference" refers to: EXT2 - EXT1 
+
+%E [:, 2] 
+
+
+% initialize variables 
+
+% initialize T=1
+
+[]=modulate();
+
+
+function [E, T50, T100, ratio ] = modulate( E, t, W_intrinsic, W_extrinsic, gain, ActDiff)
+
+% persistent function variables:
+N_extrinsic1 = 0.5;
+N_extrinsic2 = 0.6;
+rnd = a + (b-a).*rand(1);
+
+
+E(t+1,1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd  ; % E1
+
+E(t+1,2) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd ; % E2
+
+
+
+
+end
+
+
+
+
+
 
 
 
