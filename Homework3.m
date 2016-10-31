@@ -79,23 +79,59 @@ hold off
 []=modulate();
 
 
-function [E, T50, T100, ratio ] = modulate( E, t, W_intrinsic, W_extrinsic, gain, ActDiff)
+function [firing1, firing2 ] = modulate( E, t, W_intrinsic, W_extrinsic, gain)
 
 % persistent function variables:
 N_extrinsic1 = 0.5;
 N_extrinsic2 = 0.6;
 rnd = a + (b-a).*rand(1);
 
+W_extrinsic = 0.1; 
+W_intrinsic = 0.1; 
+W_inhibitory = 0.1; 
+% first iteration, when 
+t=1;
+N_extrinsic1 = 0.5;
+N_extrinsic2 = 0.6;
+E1(1)=0;
+E2(1)=0;
 
+E1(t+1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd(t) ; 
+firing1(t+1) =  sig(E1(t+1));
+
+E2(t+1) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd(t) ; 
+firing2(t+1) = sig(E2(t+1));
+
+for t=2:floor(length(time)/2) % FIRST 50n simulation cycles: 
+E1(t+1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd(t) ; 
+firing1(t+1) = firing1(t) + sig(E1(t+1));
+
+E2(t+1) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd(t) ; 
+firing2(t+1) = firing2(t) + sig(E2(t+1));
+
+end
+
+%
+
+
+for t=1:100 
 E(t+1,1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd  ; % E1
+firing1(t+1) = firing1(t) + sig(E1(t+1));
 
 E(t+1,2) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd ; % E2
+firing2(t+1) = firing2(t) + sig(E2(t+1));
 
+%diff = firing2(t+1) - firing1(t+1);
+end
 
 
 
 end
 
+T50 = firing2 > firing1  
+T100 = firing2 > firing1
+
+ratio
 
 
 
