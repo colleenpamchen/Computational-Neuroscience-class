@@ -4,39 +4,39 @@ clear all
 
 
 time = [1:101]; 
-a=-1;
+c=-1;
 b=1; 
-rnd = a + (b-a).*rand( length(time) ,1); 
+rnd = c + (b-c).*rand( length(time) ,1); 
 gain = 1; % TUNE THIS parameter in the next step  
 sig = @(input) 1/( 1 + exp(-1 * gain * input));  
 
 E1 = zeros(length(time) ,1);
 E2 = zeros(length(time) ,1);
-firing1 = zeros(length(time),1);
-firing2 = zeros(length(time),1);
+rate1 = zeros(length(time),1);
+rate2 = zeros(length(time),1);
 
 W_extrinsic = 0.1; 
 W_intrinsic = 0.1; 
 W_inhibitory = 0.1; 
 % first iteration, when 
-t=1;
 N_extrinsic1 = 0.5;
 N_extrinsic2 = 0.6;
+% initial condition
 E1(1)=0;
 E2(1)=0;
-
+t=1;
 E1(t+1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd(t) ; 
-firing1(t+1) =  sig(E1(t+1));
+rate1(t+1) =  sig(E1(t+1));
 
 E2(t+1) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd(t) ; 
-firing2(t+1) = sig(E2(t+1));
+rate2(t+1) = sig(E2(t+1));
 
-for t=2:floor(length(time)/2) % FIRST 50n simulation cycles: 
+for t=2:floor(length(time)/2) % FIRST 50 simulation cycles: 
 E1(t+1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd(t) ; 
-firing1(t+1) = firing1(t) + sig(E1(t+1));
+rate1(t+1) = rate1(t) + sig(E1(t+1));
 
 E2(t+1) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd(t) ; 
-firing2(t+1) = firing2(t) + sig(E2(t+1));
+rate2(t+1) = rate2(t) + sig(E2(t+1));
 
 end
 
@@ -46,22 +46,21 @@ W_inhibitory = 2.5;
 
 for t=ceil(length(time)/2):length(time)   
 E1(t+1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd(t) ; 
-firing1(t+1) = firing1(t) + sig(E1(t+1));
+rate1(t+1) = rate1(t) + sig(E1(t+1));
 
 E2(t+1) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd(t) ;
-firing2(t+1) = firing2(t) + sig(E2(t+1));
+rate2(t+1) = rate2(t) + sig(E2(t+1));
 
 end
 
 figure
-plot(time,firing1(2:102),'k')
+plot(time,rate1(2:102),'k')
 hold on 
-plot(time,firing2(2:102),'r')
+plot(time,rate2(2:102),'r')
 hold off
 
 
-
-%%
+%% 
 
 
 % keep track of E2 > E1 at 51st 
@@ -69,69 +68,74 @@ hold off
 % proportion of E2>E1 from the 100 runs 
 % "activity difference" refers to: EXT2 - EXT1 
 
-%E [:, 2] 
+
+% E1 = zeros(length(time) ,1);
+% E2 = zeros(length(time) ,1);
+% rate1 = zeros(length(time),1);
+% rate2 = zeros(length(time),1);
 
 
-% initialize variables 
+a = [0.05:0.05:0.25]; % activity difference, calculated from EXT2-EXT1 
+W = [0.4,1.6,3.6,6.4,10];
+W_fixed = 0.1;
+M50 = zeros(length(a),length(W));
+M100 = zeros(length(a),length(W));
+tmp1= zeros(1,100);
+tmp2= zeros(1,100);
 
-% initialize T=1
+t=1; % reset t
 
-[]=modulate();
+for i = 1:size(a)
+    
+    for j = 1:size(W)
+        
+        for trial = 1:100
+            
+            for t = 2:length(time)
+                % the firing rates at each time step
+                rnd = c + (b-c).*rand(1); 
+                N_extrinsic1=0.5; 
+                N_extrinsic2 = a(i) + N_extrinsic1; 
+                
+                E1(t+1) = N_extrinsic1 * W_fixed + E2(t) * W_fixed - E2(t) * W_fixed + rnd  ; % E1
+                rate1(t+1) = rate1(t) + sig(E1(t+1));
 
+                E2(t+1) = N_extrinsic2 * W_fixed + E1(t) * W_fixed - E1(t) * W_fixed + rnd ; % E2
+                rate2(t+1) = rate2(t) + sig(E2(t+1));
+                             
+                if t > 52  % midtrial, 50th time step     
+                E1(t+1) = N_extrinsic1 * W(j) + E2(t) * W_intrinsic - E2(t) * W(j) + rnd  ; % E1
+                rate1(t+1) = rate1(t) + sig(E1(t+1));
 
-function [firing1, firing2 ] = modulate( E, t, W_intrinsic, W_extrinsic, gain)
-
-% persistent function variables:
-N_extrinsic1 = 0.5;
-N_extrinsic2 = 0.6;
-rnd = a + (b-a).*rand(1);
-
-W_extrinsic = 0.1; 
-W_intrinsic = 0.1; 
-W_inhibitory = 0.1; 
-% first iteration, when 
-t=1;
-N_extrinsic1 = 0.5;
-N_extrinsic2 = 0.6;
-E1(1)=0;
-E2(1)=0;
-
-E1(t+1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd(t) ; 
-firing1(t+1) =  sig(E1(t+1));
-
-E2(t+1) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd(t) ; 
-firing2(t+1) = sig(E2(t+1));
-
-for t=2:floor(length(time)/2) % FIRST 50n simulation cycles: 
-E1(t+1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd(t) ; 
-firing1(t+1) = firing1(t) + sig(E1(t+1));
-
-E2(t+1) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd(t) ; 
-firing2(t+1) = firing2(t) + sig(E2(t+1));
-
+                E2(t+1) = N_extrinsic2 * W(j) + E1(t) * W_intrinsic - E1(t) * W(j) + rnd ; % E2
+                rate2(t+1) = rate2(t) + sig(E2(t+1));       
+                end       
+            end % end of time
+            if rate2(51) > rate1(51)
+                tmp1(trial)= 1;
+            end
+            if rate2(102) > rate1(102)
+                tmp2(trial)=1;
+            end                             
+                  
+        end % end of trials 
+        M50(i,j) = sum(tmp1); 
+        M100(i,j) = sum(tmp2);
+        
+    end
 end
+
 
 %
 
-
-for t=1:100 
-E(t+1,1) = N_extrinsic1 * W_extrinsic + E2(t) * W_intrinsic - E2(t) * W_inhibitory + rnd  ; % E1
-firing1(t+1) = firing1(t) + sig(E1(t+1));
-
-E(t+1,2) = N_extrinsic2 * W_extrinsic + E1(t) * W_intrinsic - E1(t) * W_inhibitory + rnd ; % E2
-firing2(t+1) = firing2(t) + sig(E2(t+1));
-
 %diff = firing2(t+1) - firing1(t+1);
-end
 
 
-
-end
-
-T50 = firing2 > firing1  
-T100 = firing2 > firing1
-
-ratio
+% 
+% T50 = rate2 > rate1  
+% T100 = rate2 > rate1
+% 
+% 
 
 
 
