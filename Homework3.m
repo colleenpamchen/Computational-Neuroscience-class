@@ -203,16 +203,16 @@ end
 subplot(3,2,3)
 imagesc(W,a,M50,[0 100])
 colorbar
-title('Modulate Extrinsic and Inhibitory weights: Time Step 50')
-xlabel('Extrinsic and Inhibitory Weights')
+title('Modulate Intrinsic weights: Time Step 50')
+xlabel('Intrinsic connection')
 ylabel('Activity Difference')
 set(gca,'XTickLabel',{'0.4','1.6','3.6','6.4','10'},'XTick',[0.4,1.6,3.6,6.4,10]);
 
 subplot(3,2,4)
 imagesc(W,a,M100,[0 100])
 colorbar
-title('Modulate Extrinsic and Inhibitory weights: Time Step 100')
-xlabel('Extrinsic and Inhibitory Weights')
+title('Modulate Intrinsic weights: Time Step 100')
+xlabel('Intrinsic connection')
 ylabel('Activity Difference')
 xticklabels = [0.4,1.6,3.6,6.4,10];
 xticks = [0.4,1.6,3.6,6.4,10];
@@ -220,7 +220,74 @@ set(gca, 'XTick', xticks, 'XTickLabel', xticklabels)
 
 
 
+a = [0.05:0.05:0.25]; % activity difference, calculated from EXT2-EXT1 
+sig = @(input,gain) 1./( 1 + exp(-1 * gain * input ));
+gain = [1:10];
+W_fixed = 0.1;
+M50 = zeros(length(a),length(gain));
+M100 = zeros(length(a),length(gain));
 
+t=1; % reset t
+
+for i = 1:length(a)
+    
+    for j = 1:length(gain)
+            tmp1= zeros(1,100);
+            tmp2= zeros(1,100);
+        for trial = 1:100
+
+            
+            for t = 2:length(time)
+                N_extrinsic1=0.5; 
+                N_extrinsic2 = a(i) + N_extrinsic1; 
+                
+                E1(t+1) = N_extrinsic1 * W_fixed + E2(t) * W_fixed - E2(t) * W_fixed + (c + (b-c).*rand(1))  ; % E1
+                rate1(t+1) = rate1(t) + sig(E1(t+1),1);
+
+                E2(t+1) = N_extrinsic2 * W_fixed + E1(t) * W_fixed - E1(t) * W_fixed + (c + (b-c).*rand(1)) ; % E2
+                rate2(t+1) = rate2(t) + sig(E2(t+1),1);
+                             
+                if t > 52  % midtrial, 50th time step     
+                E1(t+1) = N_extrinsic1 *W_fixed + E2(t) * W_fixed - E2(t) *  + (c + (b-c).*rand(1))  ; % E1
+                rate1(t+1) = rate1(t) + sig(E1(t+1),gain(j));
+
+                E2(t+1) = N_extrinsic2 *W_fixed + E1(t) * W_fixed - E1(t) * W_fixed + (c + (b-c).*rand(1)) ; % E2
+                rate2(t+1) = rate2(t) + sig(E2(t+1),gain(j));       
+                end       
+            end % end of time
+            if rate2(51) > rate1(51)
+                tmp1(trial)= 1;
+            end
+            if rate2(102) > rate1(102)
+                tmp2(trial)=1;
+            end                             
+                  
+        end % end of trials 
+        M50(i,j) = sum(tmp1); 
+        M100(i,j) = sum(tmp2);
+
+    end
+
+end
+
+
+subplot(3,2,5)
+imagesc(W,a,M50,[0 100])
+colorbar
+title('Modulate synaptic gain: Time Step 50')
+xlabel('synaptic gain')
+ylabel('Activity Difference')
+set(gca,'XTickLabel',{'2','4','6','8','10'},'XTick',[1:10]);
+
+subplot(3,2,6)
+imagesc(W,a,M100,[0 100])
+colorbar
+title('Modulate synaptic gain: Time Step 100')
+xlabel('synaptic gain')
+ylabel('Activity Difference')
+xticklabels = [1:10];
+xticks = [1:10];
+set(gca, 'XTick', xticks, 'XTickLabel', xticklabels)
 
 
 
