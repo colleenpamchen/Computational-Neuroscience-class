@@ -23,7 +23,11 @@ function fi_curve (type)
 % set the current injection range based on the neuron type.
 if strcmp (type, 'IF')
     i_inj = 1:0.02:3;
-elseif strcmp (type, 'Class1')
+elseif strcmp (type, 'Class1')function [uout, vout] = izzy(uin, vin, a, b, c, d, thr, I)
+
+if vin > thr
+    vout = c;
+    u
     i_inj = 1:0.25:100;
 elseif strcmp (type, 'Class2')
     i_inj = 1:0.025:5;

@@ -1,0 +1,32 @@
+t=1 %initial conditions
+
+
+a = [1:5] 
+w = [1:5]
+results = zeros(5,5)
+% foreach of the 100 trials, run 100 time steps 
+
+for a=1:5
+	for w=1:5
+		for trial=1:100
+			for timestep=1:101
+
+				%perform some calculations:
+					E1(t+1) = N_extrinsic1 * W(j) + E2(t) * W_intrinsic - E2(t) * W(j) + rnd  ; % E1
+	                rate1(t+1) = rate1(t) + sig(E1(t+1));
+
+	                E2(t+1) = N_extrinsic2 * W(j) + E1(t) * W_intrinsic - E1(t) * W(j) + rnd ; % E2
+	                rate2(t+1) = rate2(t) + sig(E2(t+1));  
+            end
+            % for each trial: check if condition true
+            tmp1 = rate2(52) > rate1(52)
+            tmp2 = rate2(102) > rate2(102)
+
+            % sum over 100 trials to make ratio PER experimental condition EXPERIMENT(a,w)
+        end
+        M50(a,w)=sum()
+        M100(a,w)=sum()
+    end
+end
+
+% the result here should be a 5 x 5 matrix with ratios in the range [1:100]
