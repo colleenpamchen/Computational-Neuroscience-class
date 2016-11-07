@@ -81,6 +81,10 @@ for i = 1:length(a)
             tmp2= zeros(1,100);
         for trial = 1:100
 
+            E1 = zeros(length(time) ,1);
+            E2 = zeros(length(time) ,1);
+            rate1 = zeros(length(time),1);
+            rate2 = zeros(length(time),1);
             
             for t = 2:length(time)
                 N_extrinsic1=0.5; 
@@ -130,6 +134,7 @@ end
 
 figure
 subplot(3,2,1)
+% colormap(JET)
 imagesc(W,a,M50,[0 100])
 colorbar
 title('Modulate Extrinsic and Inhibitory weights: Time Step 50')
@@ -161,11 +166,17 @@ t=1; % reset t
 for i = 1:length(a)
     
     for j = 1:length(W)
-            tmp1= zeros(1,100);
+           tmp1= zeros(1,100);
             tmp2= zeros(1,100);
+            
         for trial = 1:100
 
-            
+            E1 = zeros(length(time) ,1);
+            E2 = zeros(length(time) ,1);
+            rate1 = zeros(length(time),1);
+            rate2 = zeros(length(time),1);
+
+
             for t = 2:length(time)
                 N_extrinsic1=0.5; 
                 N_extrinsic2 = a(i) + N_extrinsic1; 
@@ -232,10 +243,14 @@ t=1; % reset t
 for i = 1:length(a)
     
     for j = 1:length(gain)
-            tmp1= zeros(1,100);
+             tmp1= zeros(1,100);
             tmp2= zeros(1,100);
         for trial = 1:100
-
+            E1 = zeros(length(time) ,1);
+            E2 = zeros(length(time) ,1);
+            rate1 = zeros(length(time),1);
+            rate2 = zeros(length(time),1);
+          
             
             for t = 2:length(time)
                 N_extrinsic1=0.5; 
