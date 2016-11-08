@@ -22,41 +22,41 @@ fr=zeros(length(prefDir),length(s));
 rmax= 52.14;
 sig= 14.73;
 
-r = cosTune(,);
+
 
 
 end
 
+
+
+for k=1:length(prefDir)
+    
+y = rmax * exp( (-1/2)* ( ( s- prefDir(k)) / sig ).^2 );
+fr(k,:) = y;
+
+% figure
+% plot(s,y)
+% title('Gaussian tuning curve of avg. firing rate','FontSize',12,'FontWeight','bold')
+% xlabel('s: orientation angle in degrees','FontSize',12,'FontWeight','bold') 
+% ylabel('f(Hz)','FontSize',12,'FontWeight','bold') 
+% legend( num2str(smax(k)) ,'Location','SouthEast');
+
+end
 function r = cosTune(pd, a)
 r = abs(cos(a-pd));
 end
 
+w_excitatory = [];
+w_inhibitory = -1*ones(1,length(s));
+w =ones(length(prefDir),length(s));
 
-% w_excitatory = [];
-% w_inhibitory = -1*ones(1,length(s));
-% w =ones(length(prefDir),length(s));
-% 
-% INH = dot(w,fr);
-% 
-% for k=1:length(smax)
-%     
-%     inh_fr = INH / ()
-%     
-% end
+INH = dot(w,fr);
 
-% for k=1:length(prefDir)
-%     
-% y = rmax * exp( (-1/2)* ( ( s- prefDir(k)) / sig ).^2 );
-% fr(k,:) = y;
-% 
-% % figure
-% % plot(s,y)
-% % title('Gaussian tuning curve of avg. firing rate','FontSize',12,'FontWeight','bold')
-% % xlabel('s: orientation angle in degrees','FontSize',12,'FontWeight','bold') 
-% % ylabel('f(Hz)','FontSize',12,'FontWeight','bold') 
-% % legend( num2str(smax(k)) ,'Location','SouthEast');
-% 
-% end
+for k=1:length(smax)
+    
+    inh_fr = INH / ()
+    
+end
 
 
 % dot(INH,w_inhibitory);
