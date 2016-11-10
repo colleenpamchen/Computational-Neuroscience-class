@@ -13,7 +13,7 @@ function cc_midterm1
 pd = [0:180]; % preferred orientation (degrees) 
 contrast = [0;12;25;50;75]; % ??????????? HOW to use contrast with pd ?? 
 % degree = [ cos(pd);sin(pd) ];
-
+Time=10; 
 
 % 7 Input Neurons: InpN 
 % how do I create input neurons using cosine turning curves? 
@@ -23,7 +23,7 @@ numOut = length(angle);
 
 % allocate and initialize neurons
 inpN = zeros(1,numInp); % inpN =zeros(length(pd),length(angle)); 
-outN = zeros(numInp,numOut);
+outN = zeros(Time,numOut);
 
 % allocate and initialize 3 sets of weights: 
 % 1. Excitatory weights from Input to Output neurons: 
@@ -39,51 +39,38 @@ wInpINH = zeros(numInp,1);
 % 3. INHIBITORY neuron to OutputNeurons: 
 wINHout = zeros(1,numOut)-1; % initialized to -1 
 
-for a=1:numInp
-    
+outN(1,:) = rand(1,numOut);    
+
+for a=1:numInp % neuron's ANGLE loop 
+    for t=2:Time
     % set the rates of the input neurons
-    for p=1:length(pd) 
-        inpN(p) = cosTune(pd(p), angle(a));
-    end
-    
-    for i=1:numOut
-    % initialize SynIn
-    SynIn = 0 ; 
-    
-        for j = 1:numInp
-            
-            % (1) SynIn = SynIn + InpN .* wInpOutExc
-            SynIN =  SynIn + inpN(j) .* wInpOutExc(j,i) ;
-            % (2) SynIn = SynIn + InpN .* wInpINH
-            SynIn = SynIn + inpN(j) .* wInpINH(j) ;
-            
-            if j==1
-            outN(1) = rand(1);    
-            % (3) SynIn = SynIn + InpN .* wINHout
-            SynIn = SynIn + outN(j) .* wINHout(i) ;
-            else 
-            SynIn = SynIn + outN(j-1) .* wINHout(i) ;    
+        for p=1:length(pd) % pd loop for inpN activity 
+            inpN(p) = cosTune(pd(p), angle(a));
+        end   
+        for i=1:numOut % loop through OutputN indexed 'i' 
+            % initialize SynIn
+            SynIn = 0 ; 
+            for j = 1:numInp % loop through InputN indexed 'j' 
+
+                % (1) 1-1 Input -> Output EXC : SynIn = SynIn + InpN .* wInpOutExc
+                SynIn =  SynIn + inpN(j) .* wInpOutExc(j,i) ;
+                % (2) all-1 Input -> INH : SynIn = SynIn + InpN .* wInpINH
+                SynIn = SynIn + inpN(j) .* wInpINH(j) ;
+
+               
+                % (3) 1-all INH -> Output : SynIn = SynIn + InpN .* wINHout
+                SynIn = SynIn + outN(t-1,i) .* wINHout(i) ;    
             end
-          
-            disp(SynIn) 
-            
-        end
-   
-        % Output Neurons: OutN
-        % set initial state of Output neurons to random numbers. 
-        % outN(1,:) = rand(1,numOut); % start at random initial orientation
+            outN(t,i) = sigmoidN (SynIn); 
+            outfr(i) = sum(outN(:,i)); 
+%             disp(outfr(i))
+        end % outN 
 
-    outN(a,i) = sigmoidN (SynIn);    
-    
-    fr(i) =  sum(outN(:,i);  
-    
-    end
-   
-    plot(pd,fr);
-    
-    
-end
+    end % end of time loop
+end % end neuron ANGLE loop 
 
+    plot(angle,outfr)
+    
 
 end % end of user-defined function
 
