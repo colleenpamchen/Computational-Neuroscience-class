@@ -1,8 +1,8 @@
-%% midterm 
-% #1 Divisive Normalization
+%% midterm #1 Divisive Normalization   author: Colleen Chen
 % (1) Implementation: 
 %
-% (2) Experimental Design: 
+% (2) Experimental Design: Present stimulus of grating contrasts of varying
+% lengh
 %
 % (3) Expected Results: 
 %
@@ -64,8 +64,8 @@ for a=1:numInpN % neuron's PrefDir loop
         end % 
        
 end % end PrefDir loop  
-    mean_fr = sum(outN,2); 
-    
+   
+mean_fr = sum(outN,2); 
     figure;
     plot(PrefDir_Neuron,mean_fr(:,1,1))
     hold on 

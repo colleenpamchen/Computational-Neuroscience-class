@@ -39,7 +39,7 @@ outN = zeros(T,numOutN);
 % the input to output weights are set to make vertical directions have
 % stronger weights projecting to the vertical output neuron and vice versa
 wInpOutExc = zeros(numInpN, numOutN); % [from, to]
-pd = pi/numInpN:pi/numInpN:pi; % preferred directions
+pd = pi/numInpN : pi/numInpN : pi; % preferred directions
 
 % used absolute value because it is orientation tuned
 %   / - \ |
