@@ -40,6 +40,7 @@ clc
 % Gaussian Tuning Curves: 
 rmax= 52.14; % parameter from Dayan&Abbot 
 sigma= 14.73; % parameter from Dayan&Abbot 
+n=2; 
 % Make Stimulus:
 s = [-45:270]; % preferred orientation (degrees) 
 c = [0;.12;.25;.50;.75]; 
@@ -92,7 +93,6 @@ for a=1:numInpN % neuron's PrefDir loop
        for si=1:length(s) % loop through 361 degrees for inpN activity 
            for ci=1:length(c) % loop through the different contrast levels 
 % calcuates the input derived from the stimulus 
-% inpN(a,si,ci) = rmax * c(ci) * exp( (-1/2)* ( ( s(si)-PrefDir_Neuron(a) ) ./ sigma ).^2 );
 inpN(a,si,ci) = rmax * exp( (-1/2)* ( ( s(si)-PrefDir_Neuron(a) ) ./ sigma ).^2 );
 % excitatory input - output connection
 inpOUT(a,si,ci) = wexc(a,si,ci) .* inpN(a,si,ci); 
@@ -108,17 +108,16 @@ outN22(a,si,ci) = 1/(1+exp(( -1 .* inpINH2(a,si,ci) )));
 % take difference of excitatory and inhibitory outputs
 outN(a,si,ci) = outN1(a,si,ci) - outN22(a,si,ci) ; 
 % Normalize the output activities of the network by contrast % 
-outN(a,si,ci) = outN(a,si,ci) .* ( c(ci) / (sigma + c(ci)) ); 
+ norm = sigma^n + c(ci)^n;
+outN(a,si,ci) = outN(a,si,ci)* c(ci) ./ norm; % ( c(ci) / (sigma + c(ci)) ); 
                 
            end         
         end %   
 end % end PrefDir loop  
     % mean firing rate of the population responses 
-    % interp1
-    
-      
     mean_fr = sum(outN,2); 
-    fr1=interp1(PrefDir_Neuron,mean_fr(:,1,1),[0:180]);
+        % interp1
+    fr1=interp1(PrefDir_Neuron,mean_fr(:,1,1),[0:180],'cubic');
     figure;
     subplot(2,3,1);
     plot([0:180],fr1)
@@ -129,7 +128,7 @@ end % end PrefDir loop
 %     xlim([-90 270])
    
     subplot(2,3,2);
-    fr2=interp1(PrefDir_Neuron,mean_fr(:,1,2),[0:180]); 
+    fr2=interp1(PrefDir_Neuron,mean_fr(:,1,2),[0:180], 'cubic'); 
     plot([0:180],fr2)
         title (['contrast=', num2str(c(2)),'%'])
    
@@ -138,7 +137,8 @@ end % end PrefDir loop
 %     ylim([0 2])
 %      xlim([-90 270])
      subplot(2,3,3);
-    plot(PrefDir_Neuron,mean_fr(:,1,3),'*-')
+      fr3=interp1(PrefDir_Neuron,mean_fr(:,1,3),[0:180], 'linear');
+    plot([0:180],fr3)
         title (['contrast=', num2str(c(3)),'%'])
     xlabel('degree')
     ylabel('activity')
