@@ -92,7 +92,7 @@ for trial=1:ntrials              % Trial number
       endt = t+interval; % set end time for action selection
       a1s(trial) = 0; a2s(trial) = 0;  % reset action neuron spike counters;
     end
-    
+   
   % if in action selection interval, count spikes from a1 and a2 neurons
     if (t>=startt) && (t<=endt)
       a1s(trial) = a1s(trial) + sum(v(a1idx)>30);
