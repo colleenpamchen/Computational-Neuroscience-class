@@ -1,9 +1,15 @@
 % %% Midterm_2.m #2 Dopamine modulated STDP solve "distal reward problem"
 % (1) Implementation: 
 %
+%
+%
 % (2) Experimental Design: 
 %
+%
+%
 % (3) Expected Results: 
+%
+%
 % daspnet.m: Spiking network with DA-modulated STDP. Based on spnet.m
 % Created by Eugene M.Izhikevich.                November 3, 2004
 %
@@ -35,18 +41,18 @@ A = randidx(51:100);
 B = randidx(101:150);
 
 
-post=ceil([N*rand(Ne,M);Ne*rand(Ni,M)]); 
+post=ceil([N*rand(Ne,M);Ne*rand(Ni,M)]); % randomly generating post synaptic connections foreach neuron? 
 s=[ones(Ne,M);-ones(Ni,M)];         % synaptic weights
 sd=zeros(N,M);                      % their derivatives
 for i=1:N
-  if i<=Ne
+  if i<=Ne % loop through excitatory cells 
     for j=1:D
       delays{i,j}=M/D*(j-1)+(1:M/D);
     end;
   else
-    delays{i,1}=1:M;
+    delays{i,1}=1:M;  % ??? What is this delay?! and what does it have to do with excitatory cells? 
   end;
-  pre{i}=find(post==i&s>0);             % pre excitatory neurons
+  pre{i} = find( post==i & s>0 );      % pre excitatory neurons
   aux{i}=N*(D-1-ceil(ceil(pre{i}/N)/(M/D)))+1+mod(pre{i}-1,N);
 end;
 STDP = zeros(N,1001+D);
@@ -95,12 +101,14 @@ for trial=1:T     % simulation of 1 trial
     % record of firing history as [timestamp, neuron]
     % can have multiple of timestamp
     k=size(firings,1);
+    % ??? What is this loop doing? 
     while firings(k,1)>t-D
+        % ??? this delay thing?... 
       del=delays{firings(k,2),t-firings(k,1)+1};
       ind = post(firings(k,2),del);
       I(ind)=I(ind)+s(firings(k,2), del)';
       sd(firings(k,2),del)=sd(firings(k,2),del)-1.5*STDP(ind,t+D)';
-      k=k-1;
+      k=k-1; % decrement k-- 
     end;
     %----------------------------------
     
