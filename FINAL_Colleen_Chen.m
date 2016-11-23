@@ -21,6 +21,27 @@
 % 
 % 
 % 
+% poisson_spikes = zeros(N,1000); 
+% poisson_spikes(1,1)=0;
+% for n=1:100
+%    for t=1:1000-1
+%        xrand = rand(1);
+%       poisson_spikes(n,t+1) =  poisson_spikes(n,t) - log(xrand)/lambda(i) ;
+% %       fired = find(poisson_spikes>xrand); 
+%    end
+% end
+% 
+%  
+% % 
+% % 
+% % % 
+% for i = 1:N
+% poisson_spikes(i,:) = poissrnd( lambda(i),1,1000 );
+% end
+% 
+% % 
+% 
+% 
 % 
 % 
 %% Standard Izzy STDP 
@@ -36,13 +57,9 @@ clear all
 close all
 clc
 
-Ne=100;                Ni=0;
+Ne=100;       Ni=0;
 N = Ne + Ni;
 S = zeros(Ne,1);
-% a=[0.02*ones(Ne,1); 0.1*ones(Ni,1)];
-% b=[0.2*ones(Ne,1);  0.2*ones(Ni,1)];
-% c=[-65*ones(Ne,1);  -65*ones(Ni,1)];
-% d=[8*ones(Ne,1);    2*ones(Ni,1)];
 
 % parameters of the excitatory RS Izzy neuron 
 a= 0.02;
@@ -51,24 +68,15 @@ c= -65;
 d= 8;
 
 % IMPLEMENT 
-% LAMBDA is the amount you'd expect to see given a time step 
-% LAMBDA = hz / ms 
-% 20/1000
-%  R = poissrnd(LAMBDA)
-% R = poissrnd( [0.2:0.2:20]/1000 )
-% R is the # of times each neuron fired in that given time step 
+% LAMBDA is the 
 
 % S contains the weights ordered from, to
 % initialize weights according to network1 configuration 
 % IMPLEMENT A all-to-one connection 
 aa=.01; bb=.03;
 for i = 1:N
-    for j = 1:1
-        if i <= Ne
-            S(i,j) = (aa + (bb-aa).*rand(1,1) ) ; %.* 1000;
-        else
-            S(i,j) = -1.0;
-        end
+    for j = 1:N
+        S(i,j) = (aa + (bb-aa).*rand(1,1) ) ; %.* 1000;  
     end
 end
 
@@ -85,21 +93,25 @@ t_minus = 60;
 wmin = 0;
 wmax = 0.05;
 
-% v=-65*ones(Ne+Ni,1);  % Initial values of v
+Time=1000;
 % there is only 1 v 
 v = -65; 
-u= b.*v;               % Initial values of u
+u= b.*v;  % Initial values of u
 
-fr=zeros(1000,1);
+fr=zeros(Time,1);
+
+% keep track of the time steps when the poisson spiked. 
+lambda=1./ [0.2:0.2:20];
+poisson_spikes=zeros(N,Time);
+for i = 1:N
+poisson_spikes(i,:) = poissrnd( lambda(i),1,1000 );
+end
+
+
 for sec = 1:1000  % 1000 simulation seconds 
     firings=0;           % spike timings
     for t=1:1000          % simulation of 1000 ms
-        % 
-        R = poissrnd( [0.2:0.2:20]/1000 );
-%         if max(R)>0
-%             disp(t)
-%         end
-        %
+       
         I= [4*randn(1)]; % thalamic input
 
         fired = find( v>=30 ); % indices of spikes FOR the one IZZY output NEURON
@@ -107,9 +119,9 @@ for sec = 1:1000  % 1000 simulation seconds
         % Set the input current for all the pre-synaptic neurons that fired
         % very inefficient but clear!!!
         for i = 1:N         % from
-            for j = 1:1     % to
-                I(j) = I(j) + S(i,j) * ( R(i) );  % v(i) >= 30);
-            end
+                for j=1:N
+            I = I + S(i,j) * ( poisson_spikes(i,t)>0 );  % v(i) >= 30);
+                end
         end
         
         if ~isempty(fired)
@@ -129,12 +141,18 @@ for sec = 1:1000  % 1000 simulation seconds
                 % 3)    set the max LTP for  weights that connect from neuron i
                 % 4)    set the max LTD for weights that connect to neuron i
                 
-                if fired(i) <= Ne
+%                 if fired(i) <= Ne
+%                     S(1:Ne, fired(i)) = min(wmax,S(1:Ne, fired(i)) + LTP(:, fired(i))); % LTP to weights that connect to i from all exc 
+%                     S(1:Ne, fired(i)) = max(wmin,S(1:Ne, fired(i)) + LTD(fired(i),:)); % LTD to weights that connect to all exc from i
+%                     LTP(fired(i),:) = A_plus;   % set max LTP to all exc from i
+%                     LTD(:,fired(i)) = A_minus;  % set max LTD to i from all exc
+%                 end
+                  if fired(i) <= Ne
                     S(1:Ne, fired(i)) = min(wmax,S(1:Ne, fired(i)) + LTP(:, fired(i))); % LTP to weights that connect to i from all exc 
-                    S(1:Ne, fired(i)) = max(wmin,S(1:Ne, fired(i)) + LTD(fired(i),:)); % LTD to weights that connect to all exc from i
+                    S(fired(i),1:Ne) = max(wmin,S(fired(i),1:Ne) + LTD(fired(i),:)); % LTD to weights that connect to all exc from i
                     LTP(fired(i),:) = A_plus;   % set max LTP to all exc from i
                     LTD(:,fired(i)) = A_minus;  % set max LTD to i from all exc
-                end
+                  end
             end
             
         end;
