@@ -75,7 +75,7 @@ d= 8;
 % IMPLEMENT A all-to-one connection 
 aa=.01; bb=.03;
 for i = 1:N
-    for j = 1:N
+    for j = 1:1
         S(i,j) = (aa + (bb-aa).*rand(1,1) ) ; %.* 1000;  
     end
 end
@@ -99,34 +99,47 @@ v = -65;
 u= b.*v;  % Initial values of u
 
 fr=zeros(Time,1);
+spikes=zeros(N,Time);
 
 % keep track of the time steps when the poisson spiked. 
-lambda=1./ [0.2:0.2:20];
-poisson_spikes=zeros(N,Time);
-for i = 1:N
-poisson_spikes(i,:) = poissrnd( lambda(i),1,1000 );
-end
+% lambdar=1./ [0.2:0.2:20];
 
+% initialize the first timestep using tau=1/rate 
+% for i = 1:N
+% poisson_spikes(i,1) = poissrnd( lambdar(i));
+% end
+% poisson_spikes = zeros(N,Time); 
+
+lambda=[0.2:0.2:20];
+for i=1:N
+   for t=1:1000-1
+      xrand = rand(1);
+      % this is generating 'tau' the interspike intervals 
+      spikes(i,t+1) =  spikes(i,t) - log(xrand)/lambda(i) ;
+   end
+end
+spikes = ceil(spikes);
 
 for sec = 1:1000  % 1000 simulation seconds 
     firings=0;           % spike timings
     for t=1:1000          % simulation of 1000 ms
        
-        I= [4*randn(1)]; % thalamic input
+        I= [4*randn(Ne,1)]; % thalamic input
 
         fired = find( v>=30 ); % indices of spikes FOR the one IZZY output NEURON
 
         % Set the input current for all the pre-synaptic neurons that fired
         % very inefficient but clear!!!
         for i = 1:N         % from
-                for j=1:N
-            I = I + S(i,j) * ( poisson_spikes(i,t)>0 );  % v(i) >= 30);
+                for j=1:1
+            I(i) = I(i) + S(i,j) * ( spikes(i,t)==t );  % v(i) >= 30);
                 end
         end
         
         if ~isempty(fired)
-%             firings = [firings; t + 0*fired, fired]; % [timesteo at which it fired, index of neuron that fired]
-            firings = firings+1;
+            firings = [firings; t + 0*fired, fired]; % [timesteo at which it fired, index of neuron that fired]
+            disp('fired!')
+%             firings = firings+1;
             v(fired) = c(fired);
             u(fired) = u(fired) + d(fired);
             
