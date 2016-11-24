@@ -15,6 +15,12 @@
 % eligibility trace (green), and the rewards (red x). Bottom right - the
 % distribution of synaptic weights with the chosen synapse marked by red dot.
 
+% this is a recurrent network with no input or output neurons
+% if I were a (post) neuron, I'd randomly get 100 pre inputs
+
+
+
+
 M=100;                 % number of synapses per neuron
 D=1;                   % maximal conduction delay
 % excitatory neurons   % inhibitory neurons      % total number
@@ -24,9 +30,11 @@ a=[0.02*ones(Ne,1);    0.1*ones(Ni,1)];
 d=[   8*ones(Ne,1);    2*ones(Ni,1)];
 sm=4;                 % maximal synaptic strength
 
-post=ceil([N*rand(Ne,M);Ne*rand(Ni,M)]);
+post=ceil([N*rand(Ne,M);Ne*rand(Ni,M)]); % index all the post synaptic neurons
+% each neuron gets 100 inputs randomly selected 
+
 s=[ones(Ne,M);-ones(Ni,M)];         % synaptic weights
-sd=zeros(N,M);                      % their derivatives
+sd=zeros(N,M);                      % their derivatives = weight change
 for i=1:N
     if i<=Ne
         for j=1:D
@@ -68,8 +76,8 @@ activityGroupB = 0;
 interval = 20;  % 20 millisecond interval to give the stimulus response.
 %--------------
 
-for sec=1:T                             % simulation of 1 day
-    for t=1:1000                          % simulation of 1 sec
+for sec=1:T                             % simulation of 1 second 
+    for t=1:1000                          % simulation of 1 msec
         I=13*(rand(N,1)-0.5);               % random thalamic input
         fired = find(v>=30);                % indices of fired neurons
         
@@ -123,11 +131,11 @@ for sec=1:T                             % simulation of 1 day
         end
         % ****************************************************************
 
-        v(fired)=-65;
+        v(fired)=-65; % fired[] at every time step, get index of all neurons that fired 
         u(fired)=u(fired)+d(fired);
         STDP(fired,t+D)=0.1;
         for k=1:length(fired)
-            sd(pre{fired(k)})=sd(pre{fired(k)})+STDP(N*t+aux{fired(k)});
+            sd(pre{fired(k)})=sd(pre{fired(k)})+STDP(N*t+aux{fired(k)}); % LTP apply A+ 
         end;
         firings=[firings;t*ones(length(fired),1),fired];
         k=size(firings,1);
@@ -135,7 +143,7 @@ for sec=1:T                             % simulation of 1 day
             del=delays{firings(k,2),t-firings(k,1)+1};
             ind = post(firings(k,2),del);
             I(ind)=I(ind)+s(firings(k,2), del)';
-            sd(firings(k,2),del)=sd(firings(k,2),del)-1.5*STDP(ind,t+D)';
+            sd(firings(k,2),del)=sd(firings(k,2),del) -1.5*STDP(ind,t+D)'; % LTD  apply A-
             k=k-1;
         end;
         v=v+0.5*((0.04*v+5).*v+140-u+I);    % for numerical
@@ -145,8 +153,8 @@ for sec=1:T                             % simulation of 1 day
         
         DA=DA*0.995;
         if (mod(t,10)==0)
-            s(1:Ne,:)=max(0,min(sm,s(1:Ne,:)+(0.002+DA)*sd(1:Ne,:)));
-            sd=0.99*sd;
+            s(1:Ne,:)=max(0,min(sm,s(1:Ne,:)+(0.002+DA)*sd(1:Ne,:))); % dopamine applied 
+            sd=0.99*sd; % eligibility trace exponential decay 
         end;
         
         % JLK commented out this section from the original experiment
@@ -159,7 +167,7 @@ for sec=1:T                             % simulation of 1 day
         %             rew=[rew,sec*1000+t+1000+ceil(2000*rand)];
         %         end;
         %     end
-        if rew==sec*1000+t
+        if rew == sec*1000 + t
             DA=DA+0.5;
             disp(['Reward applied at time ', num2str(rew)])
         end;

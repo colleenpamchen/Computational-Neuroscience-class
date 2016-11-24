@@ -1,3 +1,5 @@
+% JK rewrote the "spnet.m" by Izhikevich 
+
 Ne=200;                Ni=50;
 N = Ne + Ni;
 
@@ -37,7 +39,7 @@ for sec = 1:600
     firings=[];           % spike timings
     for t=1:1000          % simulation of 1000 ms
         I=[4*randn(Ne,1);2*randn(Ni,1)]; % thalamic input
-
+ 
         fired=find(v>=30); % indices of spikes
 
         % Set the input current for all the pre-synaptic neurons that fired

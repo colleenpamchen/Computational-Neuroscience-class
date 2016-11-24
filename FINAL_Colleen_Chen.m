@@ -53,6 +53,14 @@
 % [x] intial weights S: [aa=.01, bb=.03]  r = aa + (bb-aa).*rand(100,1);
 % this is the STDP nearest neighbor implementation: which constrains the
 % neuron pairings to only the one before post synaptic  
+%
+% [ ]  FIRST try to make the STDP + Homeostasis learning rule work with
+%       non random stimulus.  
+%
+%
+%
+
+
 clear all
 close all
 clc
@@ -115,7 +123,7 @@ for i=1:N
    for t=1:1000-1
       xrand = rand(1);
       % this is generating 'tau' the interspike intervals 
-      spikes(i,t+1) =  spikes(i,t) - log(xrand)/lambda(i) ;
+      spikes(i,t+1) =  spikes(i,t) - ( log(xrand)/lambda(i) );
    end
 end
 spikes = ceil(spikes);

@@ -146,7 +146,7 @@ for ts = 1:T
     % activity to zero.
     for i = 1:numInhibitory
         if (divisiveNormalization)
-            nInhibitory(i) = sigmoid(sum(nInputPrev .* wInpInh(i,:)), gain);
+            nInhibitory(i) = sigmoid( sum(nInputPrev .* wInpInh(i,:)) , gain);
         else
             nInhibitory(i) = 0;
         end
@@ -156,7 +156,7 @@ for ts = 1:T
     % input layer and the inhibitory neuron. Run this through a sigmoid
     % function.
     for i = 1:numOutput
-        nOutput(i) = sigmoid(sum(nInput .* wInpOut(i,:))+sum(nInhibitoryPrev .* wInhOut(i,:)), gain);
+        nOutput(i) = sigmoid( sum( nInput .* wInpOut(i,:)) + sum(nInhibitoryPrev .* wInhOut(i,:)) , gain);
     end
 end
 

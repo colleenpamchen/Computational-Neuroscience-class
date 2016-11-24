@@ -31,7 +31,13 @@
 % inhibitory layer of neuron on the population reponses irrespective of the
 % change in input visual stimulus. 
 %
-%
+%%
+
+
+
+
+
+%%
 
 clear all
 close all
