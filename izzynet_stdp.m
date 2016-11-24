@@ -1,4 +1,7 @@
 % JK rewrote the "spnet.m" by Izhikevich 
+clear all
+close all
+clc
 
 Ne=200;                Ni=50;
 N = Ne + Ni;
@@ -35,7 +38,7 @@ wmax = 5.0;
 v=-65*ones(Ne+Ni,1);  % Initial values of v
 u=b.*v;               % Initial values of u
 
-for sec = 1:600
+for sec = 1:20
     firings=[];           % spike timings
     for t=1:1000          % simulation of 1000 ms
         I=[4*randn(Ne,1);2*randn(Ni,1)]; % thalamic input
