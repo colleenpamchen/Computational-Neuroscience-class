@@ -103,16 +103,16 @@ t_plus = 20;
 t_minus = 60;
 
 wmin = 0;
-wmax = 0.05;
+wmax = 0.03;
 Time=1000;  % both simulation seconds and timestep ms 
 
 % there is only 1 v 
 % v = -65; 
-v=-65*ones(Ne+Ni,1);
-u= b.*v;  % Initial values of u
+v = -65 * ones( Ne+Ni,1 );
+u = b.*v;  % Initial values of u
 
-fr=zeros(Time,1);
-spikes=zeros(N,Time); % input spikes into the system 
+fr=zeros(Time,1); % FIRING RATE keeps track of how many cycles per second output neuron fired 
+spikes=zeros(N,Time); % input POISSON spikes into the system 
 
 % keep track of the time steps when the poisson spiked. 
 % lambdar=1./ [0.2:0.2:20];
@@ -136,9 +136,11 @@ lambda=[0.2:0.2:20]; % mean Firing Rate of poisson neurons
 for sec = 1:1000  % 1000 simulation seconds 
     firings=[];           % spike timings
     % this gets reset at every second loop 
+    
+    
     for t=1:1000          % simulation of 1000 ms
 %         I= [4*randn(Ne,1)]; % thalamic input
-   I= [40*randn(Ne,1)]; % thalamic input
+        I= [40*randn(Ne,1)]; % thalamic input
 
         fired = find( v>=30 ); % indices of spikes FOR the one IZZY output NEURON
         % original implementation has two dimensions:
@@ -156,13 +158,16 @@ for sec = 1:1000  % 1000 simulation seconds
             firings = [firings; t + 0*fired, fired]; % [timestep at which it fired, index of neuron that fired]
             % [timestpe, index of neuron who fired]
 %             disp('fired!')
-%             firings = firings+1; % the idea here is to keep track of how
+%             fr(sec) = fr+1; % the idea here is to keep track of how
 %             many times the izzy output neuron fired to get the avereage output FR
             v(fired) = c(fired);
             u(fired) = u(fired) + d(fired);
             
             % neurons that fired this timestep
             for i=1:size(fired,1)
+                
+%                 fr(sec) = size(fired,1); % this produced fr around 7 hz, too low! 
+                fr(sec)=fr(sec)+1; % the idea here is to keep track of how
                 
                 % if neuron i is excitatory
                 % 1)    apply LTP for weights that connect to neuron i 
@@ -186,6 +191,8 @@ for sec = 1:1000  % 1000 simulation seconds
 %                     LTD(:,fired(ii)) = A_minus;  % set max LTD to i from all exc
 %                   end
             end
+%              fr(sec) = size(fired,1);  % this produced firing rate around
+%              6-8hz too low! 
             
         end
         v = v + 0.5*(0.04* v.^2 +5*v +140 -u +I);
@@ -211,8 +218,8 @@ for sec = 1:1000  % 1000 simulation seconds
     
 end
 
-% figure
-% plot([1:1000], fr) % time, firing rate
+figure
+plot([1:Time], fr/100) % time, firing rate
 figure
 plot([1:100],S,'+r')    % synapse ID number, synaptic strength 
 ylim([-0.01 0.06])    
