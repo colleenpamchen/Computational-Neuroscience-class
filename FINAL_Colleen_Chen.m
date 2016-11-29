@@ -65,6 +65,12 @@ spikes1 = zeros(N,Time); % input POISSON spikes into the system
 
 % keep track of the time steps when the poisson spiked. 
 lambda=[0.2:0.2:20]; % mean Firing Rate of poisson neurons 
+% this would be the value of pixels, all 28*28 values. W= (64) izzy neuron
+% would have 784 weights [784, 64]
+% H= firing rate of 64 neurons  [64, 1] 
+% [784,64] * [64,1] = [784, 1] image 
+
+
 for i=1:N
    for t=1:1000-1
       xrand = rand(1);
@@ -128,6 +134,7 @@ for sec = 1:Time  % 1000 simulation seconds
                         S1(i) = max(wmin, S1(i) + LTD1(i)); % LTD to weights that connect to all exc from i
                         LTP1(i) = A_plus;   % set max LTP to all exc from i
                         LTD1(i) = A_minus;  % set max LTD to i from all exc
+                        % print S to look at changes over time 
                         S1(i) = ( alpha * S1(i)* (1-(R1 / Rtarget) ) + ( LTP1(i)+LTD1(i) )  ) * (R1/ (T*(1+ abs(1-(R1/Rtarget)) * gamma) )) ;          
  
                 end
