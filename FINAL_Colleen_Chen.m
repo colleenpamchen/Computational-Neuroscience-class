@@ -12,7 +12,7 @@ close all
 clc
 
 % ADD NEW homeostatic variables: 
-alpha = 10; % homeostatic scaling factor? (not given) 
+alpha = 100; % homeostatic scaling factor? (not given) 
 R = 0; % average firing rate of postsynaptic neuron j = OUTPUT neuron 
 T = 5000 ; % ms. %T=5 SECONDS. time scale over which the firing rate of the postsunaptic  neuron was averaged 
 Rtarget= 35; % 35 Hz target firing rate 
@@ -32,10 +32,7 @@ d= 8;
 % S contains the weights ordered from, to
 % initialize weights according to network1 configuration 
 % IMPLEMENT A all-to-one connections 
-S1 = zeros(N,1); %% ?????????????? for the weight matrix, is it a
-% [poisson neurons 100 x 1 izzy output neuron] ????
-% becaues if [N N] then it implies all-to-all connection, which is 
-% how izzy had it set up, and later, in the 
+S1 = zeros(N,1); 
 aa=.01; bb=.03;
 for i = 1:N
     for j = 1:Nout
@@ -56,7 +53,7 @@ t_minus = 60;
 wmin = 0;
 wmax = 0.03;
 
-Time=1000;  % conveninetly, both simulation seconds and timestep ms 
+Time=10;  % conveninetly, both simulation seconds and timestep ms 
 
 % there is only 1 v 
 v1 = -65 ;
@@ -93,16 +90,22 @@ for sec = 1:Time  % 1000 simulation seconds
                     v1 = c;
                     u1 = u1 + d;
                     vfired1 = [vfired1; t]; % v neuron fired at t 
+                    disp('vfired!')
                 
-                S1(i) = max(wmin, S1(i) + LTD1(i)); % LTD to weights that connect to all exc from i
-                LTD1(i) = A_minus;  % set max LTD to i from all exc
+                    S1(i) = (alpha * S1(i) * (1- (R/Rtarget)) + LTD1(i)) * ( R/ (T*(1+abs(1-(R/Rtarget)))*gamma) );  
+    %                 S1(i) = max(wmin, S1(i) + LTD1(i)); % LTD to weights that connect to all exc from i
+                    S1(i) = max(wmin, S1(i) );
+                    LTD1(i) = A_minus;  % set max LTD to i from all exc
                 end
+                R = fr1(sec)+1; 
                 
                 Ifired1 = find(spikes1(i,1:Time+1)==t); % the t indices of ith poisson that fired 
                 if ~isempty(Ifired1) 
+%                         disp('Ifired!')
                         I1(i) = I1(i) + S1(i);  %*length(fired) ; % If at this timestep, neuron i spiked, then add input and synaptic weight
-                       
-                        S1(i) = min(wmax, S1(i)+ LTP1(i)); % LTP to weights that connect to i from all exc 
+                        S1(i) = (100000000 * S1(i) * (1-(R/Rtarget)) + LTP1(i) ) * ( R/ (T*(1+ abs(1- R/Rtarget)*gamma)) ); 
+%                         S1(i) = min(wmax, S1(i)+ LTP1(i)); % LTP to weights that connect to i from all exc 
+                        S1(i) = min(wmax, S1(i));
                         LTP1(i) = A_plus;   % set max LTP to all exc from i          
                 end
         v1 = v1 + 0.5*(0.04* v1^2 +5*v1 +140 -u1 + I1(i) );
@@ -176,7 +179,7 @@ for sec = 1:Time  % 1000 simulation seconds
                 v = c;
                 u = u + d;   
                 vfired = [vfired; t]; % v neuron fired at t 
-                
+                 disp('vfired!')
                 S(i) = max(wmin, S(i) + LTD(i)); % LTD to weights that connect to all exc from i
                 LTD(i) = A_minus;  % set max LTD to i from all exc
             end 
