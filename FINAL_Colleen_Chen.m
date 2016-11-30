@@ -37,9 +37,11 @@ A_minus = 0.000066;
 t_plus = 20;
 t_minus = 60;
 
+Time=100;  % conveninetly, both simulation seconds and timestep ms 
+
 wmin = 0;
 wmax = 0.03;
-Time=1000;  % conveninetly, both simulation seconds and timestep ms 
+
 v1 = -65 ; % there is only 1 v
 u1 = b*v1;  % Initial values of u
 
@@ -70,27 +72,27 @@ spikes1(:,2) =  spikes1(:,1) - ( log(xrand)./lambda ) ; % this is generating 'ta
 %spikes1 = ceil(spikes1.*1000);
 count1 = zeros(N,1);
 
-
-for sec = 2:Time+5  % 1000 simulation seconds 
+% for sec = 2:Time+5  % 1000 simulation seconds 
+for sec = 1:Time
 %     disp(sec);
     dsdt = zeros(N,1);
-    if sec < Time+1
+%     if sec < Time+1
+    if sec > 1
         R = fr1(sec-1);
     end
+    K = R / (T.*(1+abs(1-R/Rtarget)*gamma));
     
     for t=1:1000        % simulation of 1000 ms
-        I1=zeros(N,1); 
-        
+        I1=zeros(N,1);    
         % IF POISSON SPIKED        
         Ifired1 = spikes1(:,2) <= t/1000+sec ; % logical array that allows you to index 
         spikes1(Ifired1,1) = spikes1(Ifired1,2);
         xrand = rand(sum(Ifired1),1); 
-        spikes1(Ifired1,2) = spikes1(Ifired1,1) - (log(xrand)./lambda(Ifired1)) ; 
-        
+        spikes1(Ifired1,2) = spikes1(Ifired1,1) - (log(xrand)./lambda(Ifired1)) ;     
         %index of all poisson i's that spiked:
         pidx = find(Ifired1); 
         
-        if(sec>5)
+%         if(sec>5)
             count1(Ifired1) = count1(Ifired1)+1;
             % update voltage
             I1(Ifired1) = S1(Ifired1); 
@@ -106,19 +108,21 @@ for sec = 2:Time+5  % 1000 simulation seconds
                 v1 = c; % reset V 
                 u1 = u1 + d;
                 disp('vfired!')
+                
+               dsdt = dsdt+ (alpha .* S1 .* (1 - R/Rtarget) + 1.*(LTD1(Ifired1))).*K;
 
             end
-            K = R / (T.*(1+abs(1-R/Rtarget)*gamma));
-            dsdt = dsdt+ (alpha .* S1 .* (1 - R/Rtarget) + 1*(LTP1+LTD1))*K;
+            
+            dsdt = dsdt+ (alpha .* S1(Ifired1) .* (1 - R/Rtarget) + 1.*(LTP1(Ifired1))).*K;
      
             LTP1 = LTP1 - LTP1/t_plus;
             LTD1 = LTD1 - LTD1/t_minus;
-        end % end of break-in period
+%         end % end of break-in period
     end % end of t ms loop 
-    if(sec>5)
+%     if(sec>5)
         S1 = S1 + dsdt;  
         S1 = max(wmin, S1 );    
-    end
+%     end
    
 end % End of TIME second loop 
 poisson_firing_rate_given= count1/Time;
