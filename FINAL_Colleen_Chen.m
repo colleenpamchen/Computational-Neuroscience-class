@@ -56,8 +56,7 @@ for i = 1:N
     end
 end
 
-fr1 = zeros(Time,1); % FIRING RATE keeps track of how many cycles per second output neuron fired 
-spikes1 = zeros(N,2); % input POISSON spikes into the system 
+fr1 = zeros(Time+1,1); % FIRING RATE keeps track of how many cycles per second output neuron fired 
 I1=zeros(N,1); 
 
 % [ ] keep track of the time steps when the poisson spiked. 
@@ -66,69 +65,63 @@ I1=zeros(N,1);
 % H= firing rate of 64 neurons  [64, 1] 
 % [784,64] * [64,1] = [784, 1] image 
 
-lambda=[0.2:0.2:20]'; % mean Firing Rate of poisson neurons    
+% INITIALIZE poisson, simulate 5 sec of poison spikes:
+spikes1 = zeros(N,2); % input POISSON spikes into the system 
+count1 = zeros(N,1);
+lambda=[0.2:0.2:20]'; % mean Firing Rate of poisson neurons per SEC   
 xrand=rand(N,1); 
 spikes1(:,2) =  spikes1(:,1) - ( log(xrand)./lambda ) ; % this is generating 'tau' the interspike intervals
-%spikes1 = ceil(spikes1.*1000);
-count1 = zeros(N,1);
 
-% for sec = 2:Time+5  % 1000 simulation seconds 
-for sec = 1:Time
+for sec = 2:Time+1  % 1000 simulation seconds 
 %     disp(sec);
     dsdt = zeros(N,1);
-%     if sec < Time+1
-    if sec > 1
-        R = fr1(sec-1);
-    end
-    K = R / (T.*(1+abs(1-R/Rtarget)*gamma));
+    R = fr1(sec-1);
+    K = R / ( T.*( 1+ abs(1-R/Rtarget)*gamma ) ) ;
     
-    for t=1:1000        % simulation of 1000 ms
-        I1=zeros(N,1);    
+    for t=1:1000        % simulation of 1000 ms   
         % IF POISSON SPIKED        
         Ifired1 = spikes1(:,2) <= t/1000+sec ; % logical array that allows you to index 
+if ~isempty(Ifired1) 
         spikes1(Ifired1,1) = spikes1(Ifired1,2);
         xrand = rand(sum(Ifired1),1); 
         spikes1(Ifired1,2) = spikes1(Ifired1,1) - (log(xrand)./lambda(Ifired1)) ;     
         %index of all poisson i's that spiked:
         pidx = find(Ifired1); 
         
-%         if(sec>5)
             count1(Ifired1) = count1(Ifired1)+1;
-            % update voltage
-            I1(Ifired1) = S1(Ifired1); 
             numFired = sum(Ifired1);
-            v1 = v1 + 0.5*(0.04* v1^2 +5*v1 +140 -u1 + sum(I1(Ifired1)) );
-            v1 = v1 + 0.5*(0.04* v1^2 +5*v1 +140 -u1 + sum(I1(Ifired1)) );
+            % update voltage
+            I1(Ifired1) = I1(Ifired1)+ S1(Ifired1); 
+            v1 = v1 + 0.5*(0.04* v1^2 +5*v1 +140 -u1 + sum(I1(Ifired1)) ) ;
+            v1 = v1 + 0.5*(0.04* v1^2 +5*v1 +140 -u1 + sum(I1(Ifired1)) ) ;
             u1 = u1 + a.*(b.*v1-u1);
-%                 disp(v1)
-                
+%                 disp(v1)       
             if v1 >=30 
-                fr1(sec)=fr1(sec)+1;
-       
-                v1 = c; % reset V 
-                u1 = u1 + d;
-                disp('vfired!')
-                
-               dsdt = dsdt+ (alpha .* S1 .* (1 - R/Rtarget) + 1.*(LTD1(Ifired1))).*K;
-
+               disp('vfired!')
+               fr1(sec)=fr1(sec)+1;
+               v1 = c; % reset V 
+               u1 = u1 + d;
+               dsdt = dsdt+ (alpha .* S1 .* (1 - R/Rtarget) + 1.*(LTP1)).*K;
+               LTP(Ifired1) = A_plus;
             end
             
-            dsdt = dsdt+ (alpha .* S1(Ifired1) .* (1 - R/Rtarget) + 1.*(LTP1(Ifired1))).*K;
-     
+            dsdt = dsdt+ (alpha .* S1 .* (1 - R/Rtarget) + 1.*(LTD1)).*K;
+            LTD(Ifired1) = A_minus;
+            
             LTP1 = LTP1 - LTP1/t_plus;
             LTD1 = LTD1 - LTD1/t_minus;
-%         end % end of break-in period
+end % end of Ifired1 
     end % end of t ms loop 
-%     if(sec>5)
+
         S1 = S1 + dsdt;  
         S1 = max(wmin, S1 );    
-%     end
+   
    
 end % End of TIME second loop 
 poisson_firing_rate_given= count1/Time;
 
 subplot(2,2,1)
-plot((1:Time), fr1) % time, firing rate
+plot((1:Time), fr1(2:Time+1)) % time, firing rate
 title('HOMEOSTASIS')
 % figure
 subplot(2,2,2)
@@ -137,7 +130,7 @@ title('HOMEOSTASIS')
 ylim([-0.01 0.06]) 
 
 
-% % Standard Izzy STDP 
+%% Standard Izzy STDP 
 % FIRST NETWORK CONFIG WITHOUT HOMEOSTASIS: 
 % IMPLEMENT A all-to-one connections: 
 
